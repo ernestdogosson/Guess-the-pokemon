@@ -6,15 +6,9 @@ import {AudioManager} from './utility/audioManager';
 
 function PokemonGame() {
   useEffect(() => {
-    const handleFirstClick = () => {
-      AudioManager.playBg();
-      window.removeEventListener("click", handleFirstClick);
-    };
-
-    window.addEventListener("click", handleFirstClick);
+    // Ensure background music is stopped when component unmounts
     return () => {
       AudioManager.stopBg();
-      window.removeEventListener("click", handleFirstClick);
     };
   }, []);
 
@@ -72,12 +66,28 @@ function PokemonGame() {
   // Fetches first round
   const startGame = () => {
     setGameStarted(true);
+    // Start background music with a short fade-in.
+    // triggered by the Start button
+    try {
+      AudioManager.setBgVolume(0);
+      AudioManager.playBg();
+      AudioManager.fadeBg(0.4, 1500); // fade to volume 0.4 over 1.5s
+    } catch (e) {
+      console.warn('Audio playback failed:', e);
+    }
+
     fetchNewRound();
   };
 
   const handleGuess = (guessedPokemon) => {
     setAnswered(true); // Reveal Pokemon
     setSelectedId(guessedPokemon.id); // Track clicked button
+
+    if (guessedPokemon.id === pokemon.id) {
+      AudioManager.playCorrect();
+    } else {
+      AudioManager.playWrong();
+    }
 
     // Wait 700 micro seconds to show result, then fetch next round
     setTimeout(() => {
