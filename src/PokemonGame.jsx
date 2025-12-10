@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import PokemonDisplay from "./components/PokemonDisplay";
 import AnswerButtons from "./components/AnswerButtons";
 import {AudioManager} from './utility/audioManager';
+import Scoreboard from "./components/Scoreboard";
 
 function PokemonGame() {
   useEffect(() => {
@@ -18,6 +19,9 @@ function PokemonGame() {
   const [options, setOptions] = useState([]); // Store all 4 Pokemon options for buttons
   const [answered, setAnswered] = useState(false); // Track if user has answered current round
   const [selectedId, setSelectedId] = useState(null); // Track which button user clicked
+  const [score, setScore] = useState(0);  // scoreboard, Correct answers
+  const [total, setTotal] = useState(0);  // scoreboard, Total rounds played
+  const [streak, setStreak] = useState(0); // scoreboard, Correct streak
 
   const fetchNewRound = async () => {
     try {
@@ -83,9 +87,14 @@ function PokemonGame() {
     setAnswered(true); // Reveal Pokemon
     setSelectedId(guessedPokemon.id); // Track clicked button
 
-    if (guessedPokemon.id === pokemon.id) {
+    setTotal((prev) => prev + 1); //scoreboard, update total rounds
+
+    if (guessedPokemon.id === pokemon.id) { // scoreboard, check if guess is correct
+      setScore((prev) => prev + 1);   // scoreboard, add 1 to score
+      setStreak((prev) => prev + 1);  // scoreboard, continue streak
       AudioManager.playCorrect();
     } else {
+      setStreak(0); // scoreboard, reset streak on wrong guess
       AudioManager.playWrong();
     }
 
@@ -98,6 +107,10 @@ function PokemonGame() {
   return (
     <div className="game-container">
       <h1 className="game-title">Who's That Pokemon?</h1>
+
+      <div className="scoreboard-wrapper">
+        <Scoreboard score={score} total={total} streak={streak} />
+      </div>
 
       <div className="display-box">
         {!gameStarted ? (
