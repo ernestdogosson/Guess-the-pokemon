@@ -48,6 +48,8 @@ function AuthPage() {
         }
     };
 
+
+
     if (isLogin) {
         return (
             <div>
