@@ -1,134 +1,219 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PokemonDisplay from "./components/PokemonDisplay";
 import AnswerButtons from "./components/AnswerButtons";
+import Scoreboard from "./components/Scoreboard";
 import {AudioManager} from './utility/audioManager';
 
 function PokemonGame() {
-  useEffect(() => {
-    // Ensure background music is stopped when component unmounts. for example when navigating away from game.
-    return () => {
-      AudioManager.stopBg();
-    };
-  }, []);
-
-
   const [gameStarted, setGameStarted] = useState(false); // Track if game has started
+  const [gameOver, setGameOver] = useState(false); // End-game state
   const [pokemon, setPokemon] = useState(null); // Store the current correct Pokemon
   const [options, setOptions] = useState([]); // Store all 4 Pokemon options for buttons
   const [answered, setAnswered] = useState(false); // Track if user has answered current round
   const [selectedId, setSelectedId] = useState(null); // Track which button user clicked
+  const [score, setScore] = useState(0);  // scoreboard, Correct answers
+  const [total, setTotal] = useState(0);  // scoreboard, Total rounds played
+  const [streak, setStreak] = useState(0); // scoreboard, Correct streak
 
-  const fetchNewRound = async () => {
-    try {
-      // Generate 4 unique random Pokemon IDs (1-151 for Gen 1) - We can change this to include all pokemons for allgenerations. 1025.
-      const ids = new Set(); // Set ensures no duplicates
-      while (ids.size < 4) {
-        ids.add(Math.floor(Math.random() * 151) + 1);
+  // topscore logic
+
+  const [topScore, setTopScore] = useState(() => {
+    const savedScore = localStorage.getItem('topScore');
+    return savedScore ? parseInt(savedScore) : 0;
+  });
+
+  useEffect(() => {
+    if (score > topScore) {
+      setTopScore(score);
+    }
+
+    localStorage.setItem('topScore', topScore);
+  }, [score, topScore]);
+  
+    // diffculties
+
+    const TIME_LIMITS = {
+      easy: 90,
+      medium: 60,
+      hard: 30
+    };
+
+    const [difficulty, setDifficulty] = useState("medium");
+    const [timeLeft, setTimeLeft] = useState(TIME_LIMITS["medium"]);
+
+    useEffect(() => {
+
+      if (timeLeft <= 0) {
+        endGame();
+        return;
       }
 
-      const idsArray = Array.from(ids); // Convert Set to Array
+      const timerId = setInterval(() => {
+        setTimeLeft((t) => t - 1);
+      }, 1000);
 
-      // Fetch all 4 Pokemon data in parallel (faster than sequential)
-      const promises = idsArray.map((id) =>
-        fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then((res) =>
-          res.json(),
-        ),
-      );
+      return () => clearInterval(timerId);
+    }, [timeLeft]);
 
-      const pokemonData = await Promise.all(promises); // Wait for all fetches to complete
+    useEffect(() => {
+      setTimeLeft(TIME_LIMITS[difficulty]);
+    }, [difficulty]);
 
-      // Pick one Pokemon as the correct answer
-      const correctIndex = Math.floor(Math.random() * 4);
-
-      // Shuffle all 4 Pokemon so correct answer isn't always in same position
-      const shuffled = [...pokemonData].sort(() => Math.random() - 0.5);
-
-      // Preload the correct Pokemon's image to prevent flash when rendering
-      const img = new Image();
-      img.src =
-        pokemonData[correctIndex].sprites.other[
-          "official-artwork"
-        ].front_default;
-      await img.decode(); // Wait for image to fully load
-
-      // Update state for new round
-      setAnswered(false); // Reset answered state (shows silhouette)
-      setSelectedId(null); // Clear previous selection
-      setOptions(shuffled); // Set button options
-      setPokemon(pokemonData[correctIndex]); // Set correct Pokemon
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
-
-  // Starts the game
-  // Fetches first round
-  const startGame = () => {
-    setGameStarted(true);
-    // Start background music with a short fade-in.
-    // triggered by the Start button
-/*     try {
-      AudioManager.setBgVolume(0);
-      AudioManager.playBg();
-      AudioManager.fadeBg(0.4, 1500); // fade to volume 0.4 over 1.5s
-    } catch (e) {
-      console.warn('Audio playback failed:', e);
-    } */
-
-    fetchNewRound();
-  };
-
-  const handleGuess = (guessedPokemon) => {
-    setAnswered(true); // Reveal Pokemon
-    setSelectedId(guessedPokemon.id); // Track clicked button
-
-    if (guessedPokemon.id === pokemon.id) {
-      AudioManager.playCorrect();
-    } else {
-      AudioManager.playWrong();
-    }
-
-    // Wait 700 micro seconds to show result, then fetch next round
-    setTimeout(() => {
+    //End game logic
+    const endGame = () => {
+      setGameOver(true);
+    };
+    const restartGame = () => {
+      setTopScore(topScore);
+      setScore(0);
+      setTotal(0);
+      setStreak(0);
+      setTimeLeft(TIME_LIMITS[difficulty]);
+      setGameOver(false);
+      setGameStarted(true);
       fetchNewRound();
-    }, 700);
-  };
+    };
 
-  return (
-    <div className="game-container">
-      <h1 className="game-title">Who's That Pokemon?</h1>
+    const fetchNewRound = async () => {
+      try {
+        // Generate 4 unique random Pokemon IDs (1-151 for Gen 1) - We can change this to include all pokemons for allgenerations. 1025.
+        const ids = new Set(); // Set ensures no duplicates
+        while (ids.size < 4) {
+          ids.add(Math.floor(Math.random() * 151) + 1);
+        }
 
-      <div className="display-box">
-        {!gameStarted ? (
-          // Before game starts: show start button
-          <button className="start-btn" onClick={startGame}>
-            Start Game
-          </button>
-        ) : (
-          // During game: show Pokemon sprite (if loaded)
-          pokemon && <PokemonDisplay pokemon={pokemon} answered={answered} />
+        const idsArray = Array.from(ids); // Convert Set to Array
+
+        // Fetch all 4 Pokemon data in parallel (faster than sequential)
+        const promises = idsArray.map((id) =>
+          fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then((res) =>
+            res.json(),
+          ),
+        );
+
+        const pokemonData = await Promise.all(promises); // Wait for all fetches to complete
+
+        // Pick one Pokemon as the correct answer
+        const correctIndex = Math.floor(Math.random() * 4);
+
+        // Shuffle all 4 Pokemon so correct answer isn't always in same position
+        const shuffled = [...pokemonData].sort(() => Math.random() - 0.5);
+
+        // Preload the correct Pokemon's image to prevent flash when rendering
+        const img = new Image();
+        img.src =
+          pokemonData[correctIndex].sprites.other[
+            "official-artwork"
+          ].front_default;
+        await img.decode(); // Wait for image to fully load
+
+        // Update state for new round
+        setAnswered(false); // Reset answered state (shows silhouette)
+        setSelectedId(null); // Clear previous selection
+        setOptions(shuffled); // Set button options
+        setPokemon(pokemonData[correctIndex]); // Set correct Pokemon
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    // Starts the game
+    const startGame = () => {
+      setGameStarted(true);
+      setGameOver(false);
+      setTimeLeft(TIME_LIMITS[difficulty]);
+      fetchNewRound();
+    };
+
+    const handleGuess = (guessedPokemon) => {
+      setAnswered(true); // Reveal Pokemon
+      setSelectedId(guessedPokemon.id); // Track clicked button
+
+      setTotal((prev) => prev + 1); //scoreboard, update total rounds
+
+      if (guessedPokemon.id === pokemon.id) { // scoreboard, check if guess is correct
+        setScore((prev) => prev + 1);   // scoreboard, add 1 to score
+        setStreak((prev) => prev + 1);  // scoreboard, continue streak
+        AudioManager.playCorrect();
+      } else {
+        setStreak(0); // scoreboard, reset streak on wrong guess
+        AudioManager.playWrong();
+      }
+
+      // Wait 700 micro seconds to show result, then fetch next round
+      setTimeout(() => {
+        fetchNewRound();
+      }, 700);
+    };
+
+    return (
+      <div className="game-container">
+        <h1 className="game-title">Who's That Pokemon?</h1>
+        {gameStarted && !gameOver && <h2>Time Left: {timeLeft}s</h2>}
+
+        {/* difficulties */}
+
+        <form>
+          <div>
+            <label htmlFor="difficulty">Difficulty: </label>
+            <select id="difficulty" name="difficulty" value={difficulty} disabled={gameStarted} onChange={(e) => setDifficulty(e.target.value)}>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </form>
+
+        <div className="scoreboard-wrapper">
+          <Scoreboard topScore={topScore} score={score} total={total} streak={streak} />
+        </div>
+
+        <div className="display-box">
+          {!gameStarted && !gameOver && (
+            // Before game starts: show start button
+            <button className="start-btn" onClick={startGame}>
+              Start Game
+            </button>
+          )}
+
+
+          {gameStarted && !gameOver && pokemon && (
+            pokemon && <PokemonDisplay pokemon={pokemon} answered={answered} />
+          )}
+
+          {/* End game screen*/}
+          {gameOver && (
+            <div className="end-screen">
+              <h1>Game Over!</h1>
+              <p>Topscore: {topScore}</p>
+              <p>Final Score: {score}</p>
+              <p>Rounds Played: {total}</p>
+              <p>Longest Streak: {streak}</p>
+              <button className="start-btn" onClick={restartGame}>
+                Play Again
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Pokemon name display - shows name when answered, empty space otherwise */}
+
+        <p className="pokemon-name-display">
+          {answered && pokemon ? pokemon.name.toUpperCase() : ""}
+        </p>
+
+        {/* Answer buttons - only show when game has started and Pokemon is loaded */}
+        {gameStarted && !gameOver && pokemon && (
+          <AnswerButtons
+            options={options} // All 4 Pokemon options
+            onGuess={handleGuess} // Function to call when button clicked
+            answered={answered} // Disables buttons when answered in round
+            correctId={pokemon.id} // ID for green styling if correct
+            selectedId={selectedId} // ID for red styling if wrong
+          />
         )}
       </div>
-
-      {/* Pokemon name display - shows name when answered, empty space otherwise */}
-
-      <p className="pokemon-name-display">
-        {answered && pokemon ? pokemon.name.toUpperCase() : ""}
-      </p>
-
-      {/* Answer buttons - only show when game has started and Pokemon is loaded */}
-      {gameStarted && pokemon && (
-        <AnswerButtons
-          options={options} // All 4 Pokemon options
-          onGuess={handleGuess} // Function to call when button clicked
-          answered={answered} // Disables buttons when answered in round
-          correctId={pokemon.id} // ID for green styling if correct
-          selectedId={selectedId} // ID for red styling if wrong
-        />
-      )}
-    </div>
-  );
-}
+    );
+  }
 
 export default PokemonGame;

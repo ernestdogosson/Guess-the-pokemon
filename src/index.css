@@ -10,6 +10,13 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* added colors */
+  --primary-color: #4e8a40 ;
+  --primary-bg-color: #6eb863;
+}
+
+body {
+  background-color: var(--primary-bg-color);
 }
 
 /* GAME CONTAINER & LAYOUT */
@@ -117,4 +124,25 @@
 .answer-btn.wrong {
   background-color: red;
   color: #fff;
+}
+.scoreboard {
+  background: rgba(0,0,0,0.3);
+  padding: 20px;
+  border-radius: 12px;
+  width: 250px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+}
+
+.scoreboard p {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.scoreboard-wrapper {
+  display: flex;
+  position: fixed;
+  right: 40px;
+  top: 120px;
 }
