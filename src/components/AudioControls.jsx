@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AudioManager } from '../utility/audioManager';
-import '../Audio.css';
+import '../min-audio.css';
 
 // AudioControls component
 // - UI to control the game's background music

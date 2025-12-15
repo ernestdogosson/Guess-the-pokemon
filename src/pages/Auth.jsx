@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Login from "../components/Login.jsx";
-import "../Auth.css";
+import "../min-auth.css";
 
 function AuthPage() {
 
