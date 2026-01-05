@@ -12,10 +12,10 @@ function Login({ setIsLogin }) {
 
   const navigate = useNavigate();
 
-  const clearList = () => {
-    setUsername("");
-    setPassword("");
-  }; // almost the same as in Auth.jsx, but does not clear localStorage
+  /*     const clearList = () => {
+        setUsername('');
+        setPassword('');
+    }; */ // Almost the same as in Auth.jsx, but does not clear localStorage
 
   const logIn = () => {
     setErrorMessage("");
@@ -69,9 +69,6 @@ function Login({ setIsLogin }) {
             <button onClick={logIn} className="btn">
               Log in
             </button>
-            <button onClick={clearList} className="btn">
-              Clear
-            </button>
           </div>
         </div>
 
@@ -86,13 +83,16 @@ function Login({ setIsLogin }) {
         <div className="switch-box">
           <p className="switch-login-p">
             Don't have an account?{" "}
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className="btn log-in"
+            <a
+              href="#"
+              className="link"
+              onClick={(e) => {
+                e.preventDefault(); // Prevents the default browser link behavior
+                setIsLogin(false);
+              }}
             >
               Register
-            </button>
+            </a>
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import Login from "../components/Login.jsx";
 import "../Auth.css";
 
 function AuthPage() {
-  const [isLogin, setIsLogin] = useState(false); // login state variable
+  const [isLogin, setIsLogin] = useState(false);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +14,7 @@ function AuthPage() {
     if (pwd.length < 8) {
       return "Password must be at least 8 characters long";
     }
-    return ""; // empty string = no error
+    return ""; // Empty string = no error
   };
 
   const addUser = () => {
@@ -38,14 +38,14 @@ function AuthPage() {
     setIsLogin(true);
   };
 
-  const clearList = () => {
-    setUsername("");
-    setPassword("");
-    if (!isLogin) {
-      localStorage.removeItem("userUsername");
-      localStorage.removeItem("userPassword");
-    }
-  };
+  /*     const clearList = () => {
+        setUsername('');
+        setPassword('');
+        if (!isLogin) {
+            localStorage.removeItem("userUsername");
+            localStorage.removeItem("userPassword");
+        }
+    }; */
 
   if (isLogin) {
     return (
@@ -84,9 +84,6 @@ function AuthPage() {
             <button onClick={addUser} className="btn">
               Register
             </button>
-            <button onClick={clearList} className="btn">
-              Clear
-            </button>
           </div>
         </div>
 
@@ -101,13 +98,16 @@ function AuthPage() {
         <div className="switch-box">
           <p className="switch-login-p">
             Already have an account?{" "}
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className="btn log-in"
+            <a
+              href="#"
+              className="link"
+              onClick={(e) => {
+                e.preventDefault(); // Prevents the default browser link behavior
+                setIsLogin(true);
+              }}
             >
               Log in
-            </button>
+            </a>
           </p>
         </div>
       </div>
