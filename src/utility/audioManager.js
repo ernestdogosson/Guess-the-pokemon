@@ -20,7 +20,7 @@ const sounds = {
 export const AudioManager = {
   // Background music control, play, pause, stop
   playBg() {
-    sounds.bg.play();
+    return sounds.bg.play();
   },
   pauseBg() {
     sounds.bg.pause();
@@ -37,6 +37,15 @@ export const AudioManager = {
   // Volume control for usage on a music volume slider if desired
   setBgVolume(vol) {
     sounds.bg.volume(vol);
+  },
+
+  // Return true if background music is currently playing
+  isBgPlaying() {
+    try {
+      return sounds.bg.playing();
+    } catch (e) {
+      return false;
+    }
   },
 
   // Play button effects (SFX feedback)
