@@ -1,18 +1,18 @@
-import { Howl } from 'howler';
+import { Howl } from "howler";
 
 // Here we can add different sounds to use by calling AudioManager methods
 const sounds = {
   bg: new Howl({
-    src: ['/music/bg.mp3'],      // from public/music folder
+    src: ["/music/bg.mp3"], // from public/music folder
     loop: true,
     volume: 0.4,
   }),
   correct: new Howl({
-    src: ['/sfx/correct.wav'],    // from public/sfx folder
+    src: ["/sfx/correct.wav"], // from public/sfx folder
     volume: 0.3,
   }),
   wrong: new Howl({
-    src: ['/sfx/wrong.mp3'],    // from public/sfx folder
+    src: ["/sfx/wrong.mp3"], // from public/sfx folder
     volume: 0.3,
   }),
 };
@@ -39,6 +39,12 @@ export const AudioManager = {
     sounds.bg.volume(vol);
   },
 
+  // Volume control for SFX
+  setSfxVolume(vol) {
+    sounds.correct.volume(vol);
+    sounds.wrong.volume(vol);
+  },
+
   // Return true if background music is currently playing
   isBgPlaying() {
     try {
@@ -55,5 +61,4 @@ export const AudioManager = {
   playWrong() {
     sounds.wrong.play();
   },
-
 };

@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
+import { AudioManager } from "../utility/audioManager";
 import PokemonDisplay from "../components/PokemonDisplay";
 import AnswerButtons from "../components/AnswerButtons";
+import AudioControls from "../components/AudioControls";
 import Scoreboard from "../components/Scoreboard";
 import "./PokemonGame.css";
 
@@ -168,9 +170,11 @@ function PokemonGame({ currentUser, onLogout }) {
     const isCorrect = guessedPokemon.id === pokemon.id;
 
     if (isCorrect) {
+      AudioManager.playCorrect();
       setScore((prev) => prev + 1);
       setStreak((prev) => prev + 1);
     } else {
+      AudioManager.playWrong();
       setStreak(0);
       setLives((prev) => {
         const newLives = prev - 1;
@@ -202,9 +206,12 @@ function PokemonGame({ currentUser, onLogout }) {
 
       {/* Logout button during game - always visible in top right */}
       {gameStarted && !gameOver && (
-        <button onClick={onLogout} className="logout-btn-game">
-          Logout
-        </button>
+        <div className="game-top-controls">
+          <AudioControls />
+          <button onClick={onLogout} className="logout-btn-game">
+            Logout
+          </button>
+        </div>
       )}
 
       <h1 className="game-title">Who's That Pokemon?</h1>
@@ -331,9 +338,7 @@ function PokemonGame({ currentUser, onLogout }) {
         <div className="display-box">
           <div className="end-screen">
             <h1 className="black">Game Over!</h1>
-            <p className="scoreboard-text top-score">
-              🏆 <i className="ri-trophy-fill"></i>Top Score:{topScore}
-            </p>
+            <p className="scoreboard-text top-score">Top Score:{topScore}</p>
             <p className="scoreboard-text final-score">Final Score: {score}</p>
             <p className="scoreboard-text">Rounds Played: {total}</p>
             <p className="scoreboard-text">Longest Streak: {streak}</p>
