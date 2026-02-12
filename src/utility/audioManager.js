@@ -20,7 +20,9 @@ const sounds = {
 export const AudioManager = {
   // Background music control, play, pause, stop
   playBg() {
-    return sounds.bg.play();
+    if (!sounds.bg.playing()) {
+      return sounds.bg.play();
+    }
   },
   pauseBg() {
     sounds.bg.pause();
