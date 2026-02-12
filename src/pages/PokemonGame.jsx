@@ -141,9 +141,9 @@ function PokemonGame({ currentUser, onLogout }) {
 
       // Only show pokemon AFTER everything is ready
       setIsLoading(false);
-    } catch (err) {
-      console.error("Error:", err);
+    } catch {
       setIsLoading(false);
+      setGameOver(true);
     }
   };
 

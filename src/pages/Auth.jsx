@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Login from "../components/Login.jsx";
+import { hashPassword } from "../utility/hashPassword";
 import "./Auth.css";
 
 function AuthPage() {
@@ -39,7 +40,7 @@ function AuthPage() {
     }
 
     localStorage.setItem("userUsername", username);
-    localStorage.setItem("userPassword", password);
+    localStorage.setItem("userPassword", hashPassword(password));
 
     setErrorMessage("Registration successful! You can now log in.");
 

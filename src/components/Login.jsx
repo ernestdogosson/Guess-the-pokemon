@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { hashPassword } from "../utility/hashPassword";
 
 function Login({ setIsLogin }) {
-  const initialUsername = localStorage.getItem("userUsername") || "";
-  const initialPassword = localStorage.getItem("userPassword") || "";
-
-  const [username, setUsername] = useState(initialUsername);
-  const [password, setPassword] = useState(initialPassword);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -33,7 +31,7 @@ function Login({ setIsLogin }) {
       return;
     }
 
-    if (username === registeredUsername && password === registeredPassword) {
+    if (username === registeredUsername && hashPassword(password) === registeredPassword) {
       setErrorMessage("Login successful!");
 
       localStorage.setItem("isLoggedIn", "true");

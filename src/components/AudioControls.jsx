@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AudioManager } from "../utility/audioManager";
 import "./AudioControls.css";
 
