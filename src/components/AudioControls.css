@@ -1,0 +1,136 @@
+/* Audio Controls - Icon based */
+.audio-controls {
+  position: relative;
+}
+
+/* Main speaker icon button */
+.audio-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #ffcb05;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.audio-icon-btn:hover {
+  background: #ffcb05;
+}
+
+.audio-icon-btn i {
+  font-size: 1.3rem;
+  color: #2a75bb;
+}
+
+/* Dropdown panel */
+.audio-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  border: 3px solid #ffcb05;
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 200px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  z-index: 1000;
+}
+
+/* Play/Pause button */
+.audio-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 8px 12px;
+  background: #2a75bb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.audio-play-btn:hover {
+  background: #1a5a8f;
+}
+
+.audio-play-btn i {
+  font-size: 1rem;
+}
+
+/* Volume section (Music / SFX) */
+.audio-volume-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.audio-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.audio-label i {
+  color: #2a75bb;
+}
+
+/* Volume slider row */
+.audio-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Slider styling */
+.audio-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffcb05;
+  border: 2px solid #2a75bb;
+  cursor: pointer;
+}
+
+.audio-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffcb05;
+  border: 2px solid #2a75bb;
+  cursor: pointer;
+}
+
+/* Percentage display */
+.audio-percent {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2a75bb;
+  min-width: 35px;
+  text-align: right;
+}

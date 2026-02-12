@@ -1,4 +1,4 @@
-import "./ScoreBoard.css";
+import "./Scoreboard.css";
 
 function Scoreboard({ topScore, score, total, streak }) {
   return (

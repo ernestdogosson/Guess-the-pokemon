@@ -1,103 +1,186 @@
-import React, { useEffect, useState } from 'react';
-import { AudioManager } from '../utility/audioManager';
-import '../min-audio.css';
+import React, { useEffect, useState } from "react";
+import { AudioManager } from "../utility/audioManager";
+import "./AudioControls.css";
 
-// AudioControls component
-// - UI to control the game's background music
-// - Play/Pause button and a volume slider
-// - Persists settings in localStorage so they survive reloads
 export default function AudioControls() {
-  // Initialize volume from localStorage
-  const getInitialVolume = () => {
-    const storedVol = localStorage.getItem('musicVolume');
-    return storedVol !== null ? Number(storedVol) : 0.4;
+  // Initialize volumes from localStorage
+  const getInitialMusicVolume = () => {
+    const stored = localStorage.getItem("musicVolume");
+    return stored !== null ? Number(stored) : 0.4;
   };
-  
-  // Track whether music is currently playing (for button label)
+
+  const getInitialSfxVolume = () => {
+    const stored = localStorage.getItem("sfxVolume");
+    return stored !== null ? Number(stored) : 0.3;
+  };
+
   const [isPlaying, setIsPlaying] = useState(false);
-  // Track the slider value (0.0 - 1.0)
-  const [volume, setVolume] = useState(getInitialVolume());
+  const [musicVolume, setMusicVolume] = useState(getInitialMusicVolume());
+  const [sfxVolume, setSfxVolume] = useState(getInitialSfxVolume());
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Apply the saved volume to the AudioManager
-    try { AudioManager.setBgVolume(volume); } catch { /* ignore */ }
-    
-    // Load saved music-on flag from previous session
-    const storedOn = localStorage.getItem('musicOn');
-   
-    if (storedOn === 'true') {
+    try {
+      AudioManager.setBgVolume(musicVolume);
+    } catch {
+      /* ignore */
+    }
+
+    const storedOn = localStorage.getItem("musicOn");
+
+    if (storedOn === "true") {
       try {
         AudioManager.playBg();
         const shouldPlay = true;
-        
+
         setTimeout(() => {
           if (!AudioManager.isBgPlaying()) {
-            localStorage.setItem('musicOn', 'false');
+            localStorage.setItem("musicOn", "false");
           } else if (shouldPlay) {
             setIsPlaying(true);
           }
         }, 400);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
-  }, [volume]);
+  }, [musicVolume]);
 
-  
-  // Toggle music play/pause when user clicks the button
+  // Apply SFX volume on mount and when it changes
+  useEffect(() => {
+    try {
+      AudioManager.setSfxVolume(sfxVolume);
+    } catch {
+      /* ignore */
+    }
+  }, [sfxVolume]);
+
   const togglePlay = () => {
     if (isPlaying) {
-      try { AudioManager.pauseBg(); } catch { /* ignore */ }
+      try {
+        AudioManager.pauseBg();
+      } catch {
+        /* ignore */
+      }
       setIsPlaying(false);
-      localStorage.setItem('musicOn', 'false');
+      localStorage.setItem("musicOn", "false");
     } else {
       try {
         AudioManager.playBg();
         setIsPlaying(true);
-        localStorage.setItem('musicOn', 'true');
-        // Verify playback actually started 
+        localStorage.setItem("musicOn", "true");
         setTimeout(() => {
           if (!AudioManager.isBgPlaying()) {
             setIsPlaying(false);
-            localStorage.setItem('musicOn', 'false');
+            localStorage.setItem("musicOn", "false");
           }
         }, 400);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   };
 
-  // Called when the volume slider changes
-  // - updates UI state
-  // - tells AudioManager to set the new volume
-  // - saves the preference
-  const onVolumeChange = (e) => {
+  const onMusicVolumeChange = (e) => {
     const v = Number(e.target.value);
-    setVolume(v);
-    try { AudioManager.setBgVolume(v); } catch { /* ignore */ }
-    localStorage.setItem('musicVolume', String(v));
+    setMusicVolume(v);
+    try {
+      AudioManager.setBgVolume(v);
+    } catch {
+      /* ignore */
+    }
+    localStorage.setItem("musicVolume", String(v));
   };
 
-  
-  // Minimal Pokémon themed layout: play/pause button + volume slider + percent label
+  const onSfxVolumeChange = (e) => {
+    const v = Number(e.target.value);
+    setSfxVolume(v);
+    try {
+      AudioManager.setSfxVolume(v);
+    } catch {
+      /* ignore */
+    }
+    localStorage.setItem("sfxVolume", String(v));
+  };
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const getVolumeIcon = () => {
+    if (!isPlaying || musicVolume === 0) {
+      return "ri-volume-mute-line";
+    } else if (musicVolume < 0.5) {
+      return "ri-volume-down-line";
+    } else {
+      return "ri-volume-up-line";
+    }
+  };
+
   return (
-    <div className='audio_controls'>
-      {/* Play / Pause */}
-      <button type="button" onClick={togglePlay} className='audio_controls_toggle'>
-        {isPlaying ? 'Pause' : 'Play'}
+    <div className="audio-controls">
+      {/* Speaker icon button */}
+      <button
+        type="button"
+        onClick={toggleDropdown}
+        className="audio-icon-btn"
+        title="Audio settings"
+      >
+        <i className={getVolumeIcon()}></i>
       </button>
 
-      {/* Volume slider and percentage */}
-      <div className='audio_controls_volume-row'>
-        <label className='normal-text'>Volume</label>
-        <input
-          className='pokeball-range'
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={onVolumeChange}
-        />
-        <span className='audio_controls_percent' >{Math.round(volume * 100)}%</span>
-      </div>
+      {/* Dropdown panel */}
+      {isOpen && (
+        <div className="audio-dropdown">
+          {/* Play/Pause toggle */}
+          <button type="button" onClick={togglePlay} className="audio-play-btn">
+            <i className={isPlaying ? "ri-pause-fill" : "ri-play-fill"}></i>
+            <span>{isPlaying ? "Pause" : "Play"}</span>
+          </button>
+
+          {/* Music volume */}
+          <div className="audio-volume-section">
+            <label className="audio-label">
+              <i className="ri-music-2-line"></i> Music
+            </label>
+            <div className="audio-volume-row">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={musicVolume}
+                onChange={onMusicVolumeChange}
+                className="audio-slider"
+              />
+              <span className="audio-percent">
+                {Math.round(musicVolume * 100)}%
+              </span>
+            </div>
+          </div>
+
+          {/* SFX volume */}
+          <div className="audio-volume-section">
+            <label className="audio-label">
+              <i className="ri-notification-3-line"></i> SFX
+            </label>
+            <div className="audio-volume-row">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={sfxVolume}
+                onChange={onSfxVolumeChange}
+                className="audio-slider"
+              />
+              <span className="audio-percent">
+                {Math.round(sfxVolume * 100)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
